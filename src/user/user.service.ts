@@ -1,13 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { BadGatewayException, BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { EmailService } from 'src/email/email.service';
+import { generateUniqueValue } from 'src/shared';
 
 @Injectable()
 export class UserService {
   // Inject userRepository generated in app.module.ts
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>
+    @InjectRepository(User) private userRepository: Repository<User>,
+    private emailService: EmailService,
+    private dataSource: DataSource,
   ) {}
 
   async createUser(body: any): Promise<void> {
@@ -15,6 +19,29 @@ export class UserService {
     user.email = body.email;
     user.name = body.email.split('@')[0];
     user.handle = user.name;
-    await this.userRepository.save(user);
+
+    // If default handle has already been used, alter it
+    const userInDB = await this.userRepository.findOneBy({ handle: user.handle });
+    if (userInDB) {
+      user.handle = user.name + generateUniqueValue(true);
+    }
+
+    user.registrationToken = generateUniqueValue();
+    const queryRunner = this.dataSource.createQueryRunner();
+    try {
+      await queryRunner.startTransaction();
+      await queryRunner.manager.save(user);
+      // await this.userRepository.save(user);
+      await this.emailService.sendSignUpEmail(user.email, user.registrationToken);
+      await queryRunner.commitTransaction();
+    } catch (exception) {
+      if (exception.message.includes('UNIQUE constraint')) {
+        throw new BadRequestException('Invalid request', { cause: [{
+          property: 'email', constraints: ['Email address is already in use']
+        }] });
+      }
+      await queryRunner.rollbackTransaction();
+      throw new BadGatewayException('Server error');
+    }
   }
 }
