@@ -1,9 +1,9 @@
-import { BadGatewayException, BadRequestException, Injectable } from '@nestjs/common';
+import { BadGatewayException, BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, FindOptionsWhere, Repository } from 'typeorm';
 import { EmailService } from 'src/email/email.service';
-import { generateUniqueValue } from 'src/shared';
+import { generateUniqueValue, Operation } from 'src/shared';
 
 @Injectable()
 export class UserService {
@@ -31,7 +31,6 @@ export class UserService {
     try {
       await queryRunner.startTransaction();
       await queryRunner.manager.save(user);
-      // await this.userRepository.save(user);
       await this.emailService.sendSignUpEmail(user.email, user.registrationToken);
       await queryRunner.commitTransaction();
     } catch (exception) {
@@ -40,6 +39,46 @@ export class UserService {
           property: 'email', constraints: ['Email address is already in use']
         }] });
       }
+      await queryRunner.rollbackTransaction();
+      throw new BadGatewayException('Server error');
+    }
+  }
+
+  async validateToken(operation: Operation, token: string): Promise<User> {
+    const where: FindOptionsWhere<User> = {};
+    if (operation === Operation.register) {
+      where.registrationToken = token;
+    } else {
+      where.loginToken = token;
+    }
+    // const user = await this.userRepository.findOneBy({ registrationToken: token });
+    const user = await this.userRepository.findOneBy(where);
+    if (!user) {
+      throw new BadRequestException('Invalid token');
+    }
+    if (operation === Operation.register) {
+      user.registrationToken = null;
+    } else {
+      user.loginToken = null;
+    }
+    // user.registrationToken = null;
+    this.userRepository.save(user);
+    return user;
+  }
+
+  async generateLoginToken(email: string): Promise<void> {
+    const user = await this.userRepository.findOneBy({ email });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }  
+    user.loginToken = generateUniqueValue();
+    const queryRunner = this.dataSource.createQueryRunner();
+    try {
+      await queryRunner.startTransaction();
+      await queryRunner.manager.save(user);
+      await this.emailService.sendLoginEmail(user.email, user.loginToken);
+      await queryRunner.commitTransaction();
+    } catch (exception) {
       await queryRunner.rollbackTransaction();
       throw new BadGatewayException('Server error');
     }

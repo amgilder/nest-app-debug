@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm"
+import { Token } from "src/auth/token.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm"
 
 @Entity({ name: 'users' })
 export class User {
@@ -15,13 +16,24 @@ export class User {
   @Column()
   email: string;
 
-  @Column({ nullable: true })
-  image: string;
+  @Column({ 
+    type: String,
+    nullable: true 
+  })
+  image: string | null;
 
-  @Column({ nullable: true })
-  registrationToken: string;
+  @Column({ 
+    type: String,
+    nullable: true 
+  })
+  registrationToken: string | null;
 
-  @Column({ nullable: true })
-  loginToken: string;
+  @Column({ 
+    type: String,
+    nullable: true 
+  })
+  loginToken: string | null;
 
+  @OneToMany(() => Token, (token) => token.user)
+  tokens: Token[];
 }

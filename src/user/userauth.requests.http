@@ -1,7 +1,28 @@
-	### Create a new user
-	POST http://localhost:8080/api/users
-	content-type: application/json
-	
-	{
-	  "email": "user1@email.com"
-	}
+### Create a new user
+POST http://localhost:8080/api/users
+content-type: application/json
+
+{
+  "email": "user1@email.com"
+}
+
+### Register a user using their assigned token
+POST http://localhost:8080/api/auth
+content-type: application/json
+
+{
+  "token": "be6d7dde-3dcd-4cdf-95ec-f15e8e3e39e2",
+  "operation": "register"
+}
+
+### Logout a user
+POST http://localhost:8080/api/auth/logout
+app-token: 23b44c3e-2ea3-49d7-a988-10d8cc28b071
+
+### Login a user
+POST http://localhost:8080/api/auth/login
+content-type: application/json
+
+{
+  "email": "user1@email.com"
+}
