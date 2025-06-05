@@ -1,0 +1,8 @@
+### Create a new article
+POST http://localhost:8080/api/articles
+content-type: application/json
+
+{
+  "title": "THIS will have a better slug or slüg or çlüß",
+  "content": "This is the content of the first article"
+}
