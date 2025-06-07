@@ -36,7 +36,7 @@ export class ArticleService {
   async publish(id: number, user: User): Promise<{ published: boolean }> {
     const articleInDB = await this.getArticle(id, user);
     articleInDB.published = !articleInDB.published;
-    articleInDB.published_at = articleInDB.published ? new Date() : null;
+    articleInDB.published_at = new Date();
     await this.articleRepository.save(articleInDB);
     return { published: articleInDB.published };
   }
