@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { EmailModule } from './email/email.module';
@@ -6,10 +6,10 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModuleOptions } from './config/database.configuration';
 import { AuthModule } from './auth/auth.module';
 import { ArticleModule } from './article/article.module';
+import { PaginationMiddleware } from './shared/pagination/pagination.middleware';
 
 @Module({
   imports: [
-    // TypeOrmModule.forRoot({...
     TypeOrmModule.forRootAsync(DatabaseModuleOptions),
     UserModule,
     EmailModule,
@@ -24,4 +24,11 @@ import { ArticleModule } from './article/article.module';
   providers: [],
 
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(PaginationMiddleware).forRoutes({ 
+      path: '*any',   // Add name to wildcard to avoid migration issues to Express v5
+      method: RequestMethod.GET 
+    });
+  }
+}

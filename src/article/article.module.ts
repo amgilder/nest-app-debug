@@ -13,6 +13,7 @@ import { AuthUserMiddleware } from 'src/auth/auth-user.middleware';
 })
 export class ArticleModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthUserMiddleware).forRoutes('articles');
+    // Add name to wildcard to avoid migration issues to Express v5
+    consumer.apply(AuthUserMiddleware).forRoutes('articles', 'users/*idOrHandle/articles');
   }
 }
