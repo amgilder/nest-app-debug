@@ -1,5 +1,5 @@
-import { Article } from "src/article/article.entity";
-import { Token } from "src/auth/token.entity";
+import { Article } from "../article/article.entity";
+import { Token } from "../auth/token.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm"
 
 @Entity({ name: 'users' })
