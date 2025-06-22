@@ -4,6 +4,8 @@ import { User } from './user.entity';
 import { DataSource, FindOptionsWhere, Repository } from 'typeorm';
 import { EmailService } from 'src/email/email.service';
 import { generateUniqueValue, Operation } from 'src/shared';
+import { UpdateUser } from './dto/update-user.dto';
+import { UserDTO } from './dto/user-dto';
 
 @Injectable()
 export class UserService {
@@ -82,5 +84,23 @@ export class UserService {
       await queryRunner.rollbackTransaction();
       throw new BadGatewayException('Server error');
     }
+  }
+
+  async updateUser(id: number, body: UpdateUser) {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException('UserNotFound');
+    }
+    user.name = body.name;
+    user.image = body.image;
+    await this.userRepository.save(user);
+  }
+
+  async getUser(handle: string): Promise<UserDTO> {
+    const user = await this.userRepository.findOneBy({ handle });
+    if (!user) {
+      throw new NotFoundException('UserNotFound');
+    }
+    return new UserDTO(user);
   }
 }

@@ -26,3 +26,6 @@ content-type: application/json
 {
   "email": "user1@email.com"
 }
+
+### Get details on a specific user
+GET http://localhost:8080/api/users/user2
