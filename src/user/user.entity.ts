@@ -1,3 +1,4 @@
+import { Reaction } from "../reaction/reaction.entity";
 import { Article } from "../article/article.entity";
 import { Token } from "../auth/token.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm"
@@ -40,4 +41,7 @@ export class User {
 
   @OneToMany(() => Article, (article) => article.user)
   articles: Article[];
+
+  @OneToMany(() => Reaction, (reaction) => reaction.user)
+  reactions: Reaction[];
 }

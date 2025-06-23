@@ -1,5 +1,6 @@
 import { User } from "src/user/user.entity";
 import { Article } from "../article.entity";
+import { Reactions } from "../../shared";
 
 export class Author {
   id: number;
@@ -23,8 +24,9 @@ export class ShortArticle {
   published: boolean;
   publishedAt: Date;
   author: Author;
+  reactions: Reactions;
 
-  constructor(article: Article) {
+  constructor(article: Article, reactions: Reactions) {
     this.id = article.id;
     this.title = article.title;
     this.slug = article.slug;
@@ -32,14 +34,15 @@ export class ShortArticle {
     this.published = article.published;
     this.publishedAt = article.published_at;
     this.author = new Author(article.user);
+    this.reactions = reactions;
   }
 }
 
 export class ArticleWithContent extends ShortArticle {
   content: string;
 
-  constructor(article: Article) {
-    super(article);
+  constructor(article: Article, reactions: Reactions) {
+    super(article, reactions);
     this.content = article.content;
   }
 }

@@ -5,11 +5,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Article } from './article.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { AuthUserMiddleware } from 'src/auth/auth-user.middleware';
+import { ReactionModule } from '../reaction/reaction.module';
 
 @Module({
   controllers: [ArticleController],
   providers: [ArticleService],
-  imports: [TypeOrmModule.forFeature([Article]), AuthModule],
+  imports: [TypeOrmModule.forFeature([Article]), AuthModule, ReactionModule],
 })
 export class ArticleModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

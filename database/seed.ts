@@ -1,5 +1,7 @@
 import { Article } from "../src/article/article.entity";
 import { Token } from "../src/auth/token.entity";
+import { Reaction } from "../src/reaction/reaction.entity";
+import { Category } from "../src/shared";
 import { User } from "../src/user/user.entity";
 import DataSource from "./config";
 import { LoremIpsum } from "lorem-ipsum";
@@ -26,12 +28,16 @@ const run = async () => {
   const userRepository = DataSource.getRepository(User);
   const articleRepository = DataSource.getRepository(Article);
   const tokenRepository = DataSource.getRepository(Token);
+  const reactionRepository = DataSource.getRepository(Reaction);
 
   // Clean up any existing data
-  const users = await userRepository.find();
-  if (users.length > 0) {
-    await userRepository.remove(users);  // Let cascade handle articles and tokens
+  const usersInDB = await userRepository.find();
+  if (usersInDB.length > 0) {
+    await userRepository.remove(usersInDB);  // Let cascade handle articles and tokens
   }
+
+  const users: User[] = [];
+  const articles: Article[] = [];
 
   // Generate some test users
   for (let i = 1; i <= 10; i++) {
@@ -39,7 +45,8 @@ const run = async () => {
     user.name = `user${i}`;
     user.handle = `user${i}`;
     user.email = `user${i}@mail.com`;
-    await userRepository.save(user)
+    await userRepository.save(user);
+    users.push(user);
 
     const token = new Token();
     token.token = `token-${user.name}`;
@@ -59,6 +66,23 @@ const run = async () => {
       }
       article.user = user;
       await articleRepository.save(article);
+      articles.push(article);
+    }
+  }
+
+  const categories: Category[] = [Category.hot, Category.like, Category.readingList];
+  for (const article of articles) {
+    if (!article.published) {
+      continue;
+    }
+
+    for (const user of users) {
+      const index = Math.floor(Math.random() * 3);
+      const reaction = new Reaction();
+      reaction.article = article;
+      reaction.user = user;
+      reaction.category = categories[index];
+      await reactionRepository.save(reaction);
     }
   }
 }

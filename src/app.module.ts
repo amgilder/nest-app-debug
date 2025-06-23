@@ -10,6 +10,7 @@ import { PaginationMiddleware } from './shared/pagination/pagination.middleware'
 import { FileModule } from './file/file.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { ReactionModule } from './reaction/reaction.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { join } from 'path';
       },
       inject: [ConfigService],
     }),
+    ReactionModule,
   ],
   controllers: [],
   providers: [],

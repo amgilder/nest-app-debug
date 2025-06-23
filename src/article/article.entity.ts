@@ -1,5 +1,6 @@
+import { Reaction } from "../reaction/reaction.entity";
 import { User } from "../user/user.entity";
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity({ name: 'articles' })
 export class Article {
@@ -32,4 +33,7 @@ export class Article {
 
   @ManyToOne(() => User, (user) => user.articles)
   user: User;
+
+  @OneToMany(() => Reaction, (reaction) => reaction.article)
+  reactions: Reaction[];
 }

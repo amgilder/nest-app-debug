@@ -23,3 +23,11 @@ export class Pagination {
     this.direction = direction;
   }
 }
+
+export enum Category {
+  like = 'like',
+  hot = 'hot',
+  readingList = 'readingList',
+}
+
+export type Reactions = Record<Category, { count: number, reacted: boolean }>
