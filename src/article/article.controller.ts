@@ -1,14 +1,13 @@
-import { Body, Controller, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { ArticleRequest } from './dto/article-request.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { User } from 'src/user/user.entity';
-import { Pagination } from 'src/shared';
+import { Category, Pagination } from 'src/shared';
 import { Page } from 'src/shared/pagination/pagination.decorator';
 import { ArticleWithContent } from './dto/article-response.dto';
 
-// @Controller('articles')
 @Controller()
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
@@ -45,7 +44,11 @@ export class ArticleController {
   async getArticles(
     @Page() page: Pagination,
     @CurrentUser() user: User,
+    @Query('reaction') reaction: Category, 
   ) {
+    if (reaction) {
+      return this.articleService.getReactedArticles(page, user, reaction);
+    }
     return this.articleService.getArticles(page, user);
   }
 
